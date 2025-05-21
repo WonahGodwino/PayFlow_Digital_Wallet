@@ -1,52 +1,90 @@
 const Transaction = require('../models/Transaction');
-const Wallet = require('../models/Wallet');
+const Wallet = require('../models/wallet');
+const User = require('../models/User');
 
 exports.createTransaction = async (req, res) => {
-  const { receiverId, amount, transactionType } = req.body;
-  const senderId = req.user;
+  const { transactionType, amount, receiver } = req.body;
+  const senderId = req.user; // Assuming this comes from auth middleware
 
-  if (!['Credit', 'Debt'].includes(transactionType)) {
+  if (!['Deposit', 'Transfer'].includes(transactionType)) {
     return res.status(400).json({ msg: 'Invalid transaction type' });
   }
 
-  if (!receiverId || !amount || amount <= 0) {
-    return res.status(400).json({ msg: 'Invalid transaction details' });
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ msg: 'Invalid transaction amount' });
   }
 
   try {
-    // Update sender's wallet
     const senderWallet = await Wallet.findOne({ userId: senderId });
-    if (transactionType === 'Debt' && senderWallet.balance < amount) {
-      return res.status(400).json({ msg: 'Insufficient funds' });
+    if (!senderWallet) return res.status(404).json({ msg: 'Sender Does not have a Wallet yet' });
+
+    // Handle DEPOSIT
+    if (transactionType === 'Deposit') {
+      senderWallet.balance += amount;
+      await senderWallet.save();
+
+      const depositTx = new Transaction({
+        senderId,
+        receiverId: senderId,
+        amount,
+        transactionType: 'Credit', // Record as Credit for Deposit
+      });
+      await depositTx.save();
+
+      return res.status(201).json({ msg: 'Deposit successful', transaction: depositTx });
     }
 
-    // Update wallets
-    const receiverWallet = await Wallet.findOne({ userId: receiverId });
-    if (!receiverWallet) return res.status(404).json({ msg: 'Receiver wallet not found' });
+    // Handle TRANSFER
+    if (transactionType === 'Transfer') {
+      if (!receiver) return res.status(400).json({ msg: 'Receiver ID required for transfer' });
 
-    if (transactionType === 'Debt') {
+      const receiverUser = await User.findById(receiver);
+      if (!receiverUser) return res.status(404).json({ msg: 'Receiver not found, Reciever should create an account to use the service' });
+
+      const receiverWallet = await Wallet.findOne({ userId: receiver });
+      if (!receiverWallet) return res.status(404).json({ msg: 'Receiver wallet not found' });
+
+      if (senderWallet.balance < amount) {
+        return res.status(400).json({ msg: 'Insufficient balance' });
+      }
+
+      // Perform Transfer
       senderWallet.balance -= amount;
       receiverWallet.balance += amount;
-    } else {
-      // For Credit, it's like depositing to receiver's account (e.g., admin top-up)
-      receiverWallet.balance += amount;
+
+      await senderWallet.save();
+      await receiverWallet.save();
+
+      // Create sender transaction (Debt)
+      const senderTx = new Transaction({
+        senderId,
+        receiverId: receiver,
+        amount,
+        transactionType: 'Debt',
+      });
+
+      // Create receiver transaction (Credit)
+      const receiverTx = new Transaction({
+        senderId,
+        receiverId: receiver,
+        amount,
+        transactionType: 'Credit',
+      });
+
+      await senderTx.save();
+      await receiverTx.save();
+
+      return res.status(201).json({
+        msg: '✅Transfer successful',
+        transactions: {
+          senderTransaction: senderTx,
+          receiverTransaction: receiverTx,
+        },
+      });
     }
-
-    await senderWallet.save();
-    await receiverWallet.save();
-
-    const transaction = new Transaction({
-      senderId,
-      receiverId,
-      amount,
-      transactionType
-    });
-
-    await transaction.save();
-    res.status(201).json({ msg: 'Transaction successful', transaction });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Server error' });
+    return res.status(500).json({ msg: 'Server error, Contact Support' });
   }
 };
