@@ -4,19 +4,19 @@ const User = require('../models/User');
 
 exports.createTransaction = async (req, res) => {
   const { transactionType, amount, receiver } = req.body;
-  const senderId = req.user; // Assuming this comes from auth middleware
+  const senderId = req.user; // this is comes from auth in middleware
 
   if (!['Deposit', 'Transfer'].includes(transactionType)) {
-    return res.status(400).json({ msg: 'Invalid transaction type' });
+    return res.status(400).json({ msg: '❗Invalid transaction type' });
   }
 
   if (!amount || amount <= 0) {
-    return res.status(400).json({ msg: 'Invalid transaction amount' });
+    return res.status(400).json({ msg: '❗Invalid transaction amount' });
   }
 
   try {
     const senderWallet = await Wallet.findOne({ userId: senderId });
-    if (!senderWallet) return res.status(404).json({ msg: 'Sender Does not have a Wallet yet' });
+    if (!senderWallet) return res.status(404).json({ msg: '❗Sender Does not have a Wallet yet' });
 
     // Handle DEPOSIT
     if (transactionType === 'Deposit') {
@@ -31,21 +31,21 @@ exports.createTransaction = async (req, res) => {
       });
       await depositTx.save();
 
-      return res.status(201).json({ msg: 'Deposit successful', transaction: depositTx });
+      return res.status(201).json({ msg: '✅ Deposit successful', transaction: depositTx });
     }
 
     // Handle TRANSFER
     if (transactionType === 'Transfer') {
-      if (!receiver) return res.status(400).json({ msg: 'Receiver ID required for transfer' });
+      if (!receiver) return res.status(400).json({ msg: '❗Receiver ID required for transfer' });
 
       const receiverUser = await User.findById(receiver);
-      if (!receiverUser) return res.status(404).json({ msg: 'Receiver not found, Reciever should create an account to use the service' });
+      if (!receiverUser) return res.status(404).json({ msg: '❗Receiver not found, Reciever should create an account to use the service' });
 
       const receiverWallet = await Wallet.findOne({ userId: receiver });
-      if (!receiverWallet) return res.status(404).json({ msg: 'Receiver wallet not found' });
+      if (!receiverWallet) return res.status(404).json({ msg: '❗Receiver wallet not found' });
 
       if (senderWallet.balance < amount) {
-        return res.status(400).json({ msg: 'Insufficient balance' });
+        return res.status(400).json({ msg: '❗Insufficient balance' });
       }
 
       // Perform Transfer
@@ -85,6 +85,29 @@ exports.createTransaction = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ msg: 'Server error, Contact Support' });
+    return res.status(500).json({ msg: '❗Server error, Contact Support' });
   }
 };
+
+// function to view user transaction by ID
+exports.getUserTransactions = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const transactions = await Transaction.find({
+      $or: [
+        { senderId: userId },
+        { receiverId: userId } 
+      ]
+    })
+    .sort({ createdAt: -1 })  // Most recent first
+    .populate('senderId', 'email')  // Populate sender info (e.g., email)
+    .populate('receiverId', 'email');  // Populate receiver info
+
+    res.status(200).json({ transactions });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Server error while fetching transactions' });
+  }
+};
+

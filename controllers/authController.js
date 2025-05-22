@@ -13,11 +13,11 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await new User({ email, password: hashedPassword }).save();
 
-    await new Wallet({ userId: newUser._id, balance }).save();
+    await new Wallet({ userId: newUser._id, balance:0 }).save();
 
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
 
-    res.status(201).json({ token, userId: newUser._id });
+    res.status(201).json({ message:'user token: ',token, userId: newUser._id });
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
