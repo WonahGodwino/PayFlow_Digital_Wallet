@@ -3,15 +3,18 @@ const router = express.Router();
 const transactionController = require('../controllers/transactionController');
 const auth = require('../middleware/authMiddleware');
 
+
 // @route   POST /api/transactions
 // @desc    Create a new transaction
 // @access  Private
-router.post('/transactions', auth, transactionController.createTransaction);
+// POST /api/transactions
+router.post('/', auth, transactionController.createTransaction);
 
 //Additional functionality outside my milestone 2
 //viewing user's transaction history using user Id
-//GET /api/view_user/transactions/:userId
+//GET /api/transactions/user/:userId
 
-router.get('/view_user/transactions/:userId', auth, transactionController.getUserTransactions);
+// GET /api/transactions/user/:userId
+router.get('/user/:userId', auth, transactionController.getUserTransactions);
 
 module.exports = router;
