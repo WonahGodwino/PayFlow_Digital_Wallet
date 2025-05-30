@@ -10,11 +10,11 @@ const auth = require('../middleware/authMiddleware');
 // POST /api/transactions
 router.post('/', auth, transactionController.createTransaction);
 
-//Additional functionality outside my milestone 2
+//Milestone 3
 //viewing user's transaction history using user Id
 //GET /api/transactions/user/:userId
 
-// GET /api/transactions/user/:userId
+// GET /api/view/transactions/user/:userId
 router.get('/user/:userId', auth, transactionController.getUserTransactions);
 
 module.exports = router;
