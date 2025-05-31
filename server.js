@@ -14,9 +14,14 @@ connectDB();
 app.use(express.json());
 
 
-// Authentication and registration routes
+// Authentication, registration and login routes
 // authentication route
 app.use('/api/auth', authRoutes);
+//user registeration and wallet creation route
+//post/api/auth/register
+
+//login Post /api/auth/login
+
 
 // to create transactions
 // post/api/transactions
@@ -25,10 +30,6 @@ app.use('/api/transactions', transactionRoutes);
 //GET user transactions
 ///api/view/transactions/user/:userId	
 app.use('/api/view/transactions/', transactionRoutes);
-
-//user registeration and wallet creation route
-//post/api/register
-app.use('/api/register', authRoutes);
 
 //  Wallet route
 // GET /api/wallet/me/:userid
