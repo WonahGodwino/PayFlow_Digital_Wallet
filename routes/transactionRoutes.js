@@ -12,9 +12,7 @@ router.post('/', auth, transactionController.createTransaction);
 
 //Milestone 3
 //viewing user's transaction history using user Id
-//GET /api/transactions/user/:userId
-
-// GET /api/view/transactions/user/:userId
+//GET /api/transactions/user/<userId>
 router.get('/user/:userId', auth, transactionController.getUserTransactions);
 
 module.exports = router;

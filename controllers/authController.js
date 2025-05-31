@@ -13,7 +13,7 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await new User({ email, password: hashedPassword }).save();
 
-    await new Wallet({ userId: newUser._id, balance:0 }).save();
+    await new Wallet({ userId: newUser._id }).save();
 
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1d' });
 

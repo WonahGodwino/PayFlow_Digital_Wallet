@@ -97,17 +97,32 @@ exports.getUserTransactions = async (req, res) => {
     const transactions = await Transaction.find({
       $or: [
         { senderId: userId },
-        { receiverId: userId } 
+        { receiverId: userId }
       ]
     })
-    .sort({ createdAt: -1 })  // Most recent first
-    .populate('senderId', 'email')  // Populate sender info (e.g., email)
-    .populate('receiverId', 'email');  // Populate receiver info
+      .sort({ createdAt: -1 })
+      .populate('senderId', 'email')
+      .populate('receiverId', 'email');
 
-    res.status(200).json({ transactions });
+    if (transactions.length === 0) {
+      return res.status(200).json({ message: '🚫 User has not performed any transactions yet.' });
+    }
+
+    // Format the createdAt field for each transaction
+    const formattedTransactions = transactions.map(tx => ({
+      _id: tx._id,
+      sender: tx.senderId.email,
+      receiver: tx.receiverId.email,
+      amount: tx.amount,
+      transactionType: tx.transactionType,
+      createdAt: tx.createdAt.toLocaleString(), // Human-readable format
+    }));
+
+    res.status(200).json({ transactions: formattedTransactions });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: 'Server error while fetching transactions' });
+    res.status(500).json({ msg: '❗Server error while fetching transactions' });
   }
 };
+
 
