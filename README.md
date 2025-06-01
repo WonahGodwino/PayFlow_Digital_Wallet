@@ -9,5 +9,5 @@ POST /api/transactions
 
 # to get user transactions by id
 // GET /api/view/transactions/user/<userId>
-# To view user balance
+# To view user balance by the authenticated user
 GET /api/wallet/me
