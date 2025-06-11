@@ -7,7 +7,7 @@ API List
 # create transactions
 POST /api/transactions
 
-# to get user transactions by id
+# to get user transactions by id (admin use)
 // GET /api/view/transactions/user/<userId>
-# To view user balance by the authenticated user
+# To view user's balance by the authenticated user
 GET /api/wallet/me
