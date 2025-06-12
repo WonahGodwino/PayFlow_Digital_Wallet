@@ -15,7 +15,8 @@ exports.getMyWallet = async (req, res) => {
     res.status(200).json({
       msg: '✅ Wallet retrieved successfully',
       wallet: {
-        user: wallet.userId.email,
+        name:wallet.userId.name,
+        email: wallet.userId.email,
         balance: wallet.balance,
         currency: wallet.currency,
         lastUpdated: wallet.lastUpdated,

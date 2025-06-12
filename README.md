@@ -11,3 +11,4 @@ POST /api/transactions
 // GET /api/view/transactions/user/<userId>
 # To view user's balance by the authenticated user
 GET /api/wallet/me
+
