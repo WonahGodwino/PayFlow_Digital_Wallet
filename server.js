@@ -13,7 +13,8 @@ connectDB();
 
 app.use(express.json());
 
-
+console.log('Node.js version:', process.version);
+console.log('Express path:', require.resolve('express'));
 // Authentication, registration and login routes
 // authentication route
 app.use('/api/auth', authRoutes);
