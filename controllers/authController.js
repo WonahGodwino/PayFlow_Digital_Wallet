@@ -4,14 +4,14 @@ const User = require('../models/User');
 const Wallet = require('../models/Wallet');
 
 exports.register = async (req, res) => {
-  const { email, password } = req.body;
+  const { name, email, password }  = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ msg: 'User already exists' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await new User({ email, password: hashedPassword }).save();
+    const newUser = await new User({ name, email, password: hashedPassword }).save();
 
     await new Wallet({ userId: newUser._id }).save();
 
