@@ -1,5 +1,5 @@
 const Transaction = require('../models/Transaction');
-const Wallet = require('../models/wallet');
+const Wallet = require('../models/Wallet');
 const User = require('../models/User');
 
 exports.createTransaction = async (req, res) => {
