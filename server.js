@@ -34,7 +34,14 @@ app.use('/api/view/transactions/', transactionRoutes);
 //  Wallet route
 // GET /api/wallet/me/:userid
 app.use('/api/wallet', walletRoutes);
-
+//health check
+app.get('/api/healthcheck', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
