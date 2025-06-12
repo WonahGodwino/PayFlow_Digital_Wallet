@@ -1,4 +1,4 @@
-const Wallet = require('../models/wallet');
+const Wallet = require('../models/Wallet');
 const User = require('../models/User');
 
 // Get wallet of the currently authenticated user

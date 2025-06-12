@@ -21,7 +21,7 @@ const WalletSchema = new mongoose.Schema({
 });
 
 // Fix: Prevent OverwriteModelError in development caused by model being compiled multiple times
-const Wallet = mongoose.models.wallet || mongoose.model('wallet', WalletSchema);
+const Wallet = mongoose.models.Wallet || mongoose.model('Wallet', WalletSchema);
 
 module.exports = Wallet;
 
