@@ -6,7 +6,7 @@ exports.getMyWallet = async (req, res) => {
   const userId = req.user; // Comes from authentication middleware
 
   try {
-    const wallet = await Wallet.findOne({ userId }).populate('userId', 'email');
+    const wallet = await Wallet.findOne({ userId }).populate('userId', 'email name');
 
     if (!wallet) {
       return res.status(404).json({ msg: '❗No Wallet associated with the user ID' });
@@ -15,7 +15,7 @@ exports.getMyWallet = async (req, res) => {
     res.status(200).json({
       msg: '✅ Wallet retrieved successfully',
       wallet: {
-        name:wallet.userId.name,
+        name: wallet.userId.name,
         email: wallet.userId.email,
         balance: wallet.balance,
         currency: wallet.currency,
