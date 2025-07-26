@@ -90,7 +90,55 @@ exports.createTransaction = async (req, res) => {
 };
 
 // function to view user transaction by ID
+
 exports.getUserTransactions = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Find only relevant transactions
+    const senderDebtTxns = await Transaction.find({
+      senderId: userId,
+      transactionType: 'Debt',
+    })
+      .sort({ createdAt: -1 })
+      .populate('senderId', 'email')
+      .populate('receiverId', 'email');
+
+    const receiverCreditTxns = await Transaction.find({
+      receiverId: userId,
+      transactionType: 'Credit',
+    })
+      .sort({ createdAt: -1 })
+      .populate('senderId', 'email')
+      .populate('receiverId', 'email');
+
+    const transactions = [...senderDebtTxns, ...receiverCreditTxns];
+
+    if (transactions.length === 0) {
+      return res.status(200).json({ message: '🚫 User has not performed any transactions yet.' });
+    }
+
+    // Format transactions
+    const formattedTransactions = transactions.map(tx => ({
+      _id: tx._id,
+      sender: tx.senderId.email,
+      receiver: tx.receiverId.email,
+      amount: tx.amount,
+      transactionType: tx.transactionType,
+      createdAt: tx.createdAt.toLocaleString(),
+    }));
+
+    // Sort combined transactions by date descending
+    formattedTransactions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    res.status(200).json({ transactions: formattedTransactions });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: '❗Server error while fetching transactions' });
+  }
+};
+
+/*exports.getUserTransactions = async (req, res) => {
   const { userId } = req.params;
 
   try {
@@ -124,5 +172,5 @@ exports.getUserTransactions = async (req, res) => {
     res.status(500).json({ msg: '❗Server error while fetching transactions' });
   }
 };
-
+*/
 
